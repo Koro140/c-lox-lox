@@ -88,4 +88,12 @@ public:
     std::string stringfy() {
         return std::string(tokenTypeToString(type) + " " + std::to_string(line) + " " + lexeme);
     }
+
+    std::string getLexeme() {
+        return lexeme;
+    }
+
+    std::any getValue() {
+        return value;
+    }
 };

@@ -6,6 +6,8 @@
 
 #include "Token.h"
 #include "Scanner.h"
+#include "Expr.h"
+#include "AstPrinter.h"
 
 class Application
 {
@@ -23,7 +25,7 @@ public:
             runLoop();
         }
     }
-
+    
     ~Application() {
 
     }
@@ -73,7 +75,22 @@ public:
         {
             std::cout << i.stringfy() << std::endl;
         }
+
+        Token plus = Token{TOK_PLUS, 1, "+", nullptr};
+
+        Literal literal1 = Literal{1.0};
+        Literal literal10 = Literal{10.0};
         
+        Unary unary = Unary{&plus, &literal1};
+
+        Grouping grouping = Grouping{&unary};
+
+        AstPrinter printer;
+        Binary expr = Binary{&grouping, &plus, &literal10};
+        
+        printer.visit(expr);
+
+        std::cout << printer.getResult();
     }
 
     static void error(int line, const std::string& message) {

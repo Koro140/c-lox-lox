@@ -1,6 +1,7 @@
 # Lox Interpreter
 
 Implementation of the **Lox programming language** in C++
+
 *Crafting Interpreters*: https://craftinginterpreters.com/
 
 ## Build and Run
