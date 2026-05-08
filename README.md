@@ -22,3 +22,9 @@ To run in interactive mode
 ```bash
 ./build/Lox
 ```
+
+### AST Builder
+To generate the Expr.h file build and run
+```bash
+./build/AST_Gen
+```
