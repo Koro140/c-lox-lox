@@ -96,4 +96,12 @@ public:
     std::any getValue() {
         return value;
     }
+
+    TokenType getType() {
+        return type;
+    }
+
+    int getLine() {
+        return line;
+    }
 };

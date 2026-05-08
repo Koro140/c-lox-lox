@@ -7,6 +7,7 @@ set(
     SRC_LOX
     src/main.cpp
     src/Scanner.cpp
+    src/Parser.cpp
 )
 
 set(

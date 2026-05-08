@@ -8,6 +8,7 @@
 #include "Scanner.h"
 #include "Expr.h"
 #include "AstPrinter.h"
+#include "Parser.h"
 
 class Application
 {
@@ -59,7 +60,6 @@ public:
             std::getline(std::cin, inputStr);
             if (inputStr.empty())
             {
-                std::cout << "Goodbye\n";
                 break;
             }
 
@@ -70,31 +70,28 @@ public:
     void run(std::string source) {
         Scanner scanner{source};
         std::vector<Token> tokens = scanner.scanTokens();
+        Parser parser = Parser(tokens);
+        Expr* expression = parser.parse();
 
-        for (auto &i : tokens)
+        if (hadError)
         {
-            std::cout << i.stringfy() << std::endl;
+            return;
         }
-
-        Token plus = Token{TOK_PLUS, 1, "+", nullptr};
-
-        Literal literal1 = Literal{1.0};
-        Literal literal10 = Literal{10.0};
         
-        Unary unary = Unary{&plus, &literal1};
-
-        Grouping grouping = Grouping{&unary};
-
         AstPrinter printer;
-        Binary expr = Binary{&grouping, &plus, &literal10};
-        
-        printer.visit(expr);
-
-        std::cout << printer.getResult();
+        std::cout << printer.print(expression);
     }
 
     static void error(int line, const std::string& message) {
         report(line, "", message);
+    }
+    
+    static void error(Token* token, std::string message) {
+        if (token->getType() == TOK_EOF) {
+            report(token->getLine(), " at end", message);
+        } else {
+            report(token->getLine(), " at '" + token->getLexeme() + "'", message);
+        }
     }
 
     static void report(int line, const std::string& where, const std::string& message) {
