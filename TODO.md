@@ -1,0 +1,1 @@
+- Fix the Application.h and move the implementations to Application.cpp
