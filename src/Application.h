@@ -9,28 +9,18 @@
 #include "Expr.h"
 #include "AstPrinter.h"
 #include "Parser.h"
+#include "Interpreter.h"
 
 class Application
 {
 private:
-    bool hadError = false;
+    bool hadError = false;  
+    bool hadRuntimeError = false;
 public:
 
-    Application(int argc, char** argv) {
-        if (argc > 2) {
-            std::cerr << "Usage : cpp-lox [script]" << std::endl;
-            exit(64);
-        } else if (argc == 2) {
-            runFile(argv[1]);
-        } else {
-            runLoop();
-        }
-    }
-    
-    ~Application() {
+    Application(int argc, char** argv);
+    static Application* getInstance();
 
-    }
-    
     void runFile(char* filePath) {
         std::string path = SCRIPT_PATH;
         path.append(filePath);
@@ -45,11 +35,12 @@ public:
         std::string content = buffer.str();
         
         run(content);
-        if (hadError)
-        {
+        if (hadError){
             exit(65);
         }
-        
+        if (hadRuntimeError) {
+            exit(75);
+        }
     }
 
     void runLoop() {
@@ -79,7 +70,10 @@ public:
         }
         
         AstPrinter printer;
-        std::cout << printer.print(expression);
+        //std::cout << printer.print(expression);
+
+        Interpreter i;
+        i.interpret(expression);
     }
 
     static void error(int line, const std::string& message) {
@@ -92,6 +86,11 @@ public:
         } else {
             report(token->getLine(), " at '" + token->getLexeme() + "'", message);
         }
+    }
+
+    static void runtimeError(Interpreter::RuntimeError error) {
+        std::cout << error.what() << "\n[line " << error.getToken()->getLine() << "]";
+        getInstance()->hadRuntimeError = true;
     }
 
     static void report(int line, const std::string& where, const std::string& message) {

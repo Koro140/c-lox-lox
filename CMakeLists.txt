@@ -6,14 +6,20 @@ project(AST_Gen)
 set(
     SRC_LOX
     src/main.cpp
+    src/Application.cpp
     src/Scanner.cpp
     src/Parser.cpp
+    src/Interpreter.cpp
 )
 
 set(
     SRC_AST_GEN
     ast-gen/main.cpp
 )
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 include_directories(src)
 
