@@ -10,6 +10,7 @@ set(
     src/Scanner.cpp
     src/Parser.cpp
     src/Interpreter.cpp
+    src/Environment.cpp
 )
 
 set(

@@ -1,7 +1,7 @@
 #pragma once
 #include "Expr.h"
 
-class AstPrinter : public Visitor
+class AstPrinter : public ExprVisitor
 {
 private:
     std::string result;

@@ -62,18 +62,18 @@ public:
         Scanner scanner{source};
         std::vector<Token> tokens = scanner.scanTokens();
         Parser parser = Parser(tokens);
-        Expr* expression = parser.parse();
+        std::vector<Stmt*> statements = parser.parse();
 
         if (hadError)
         {
             return;
         }
         
-        AstPrinter printer;
+        //AstPrinter printer;
         //std::cout << printer.print(expression);
 
         Interpreter i;
-        i.interpret(expression);
+        i.interpret(statements);
     }
 
     static void error(int line, const std::string& message) {

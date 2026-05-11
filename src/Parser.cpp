@@ -2,16 +2,80 @@
 #include "Parser.h"
 #include "Application.h"
 
-Expr* Parser::parse() {
-    try {
-        return expression();
-    } catch (ParseError error) {
+std::vector<Stmt*> Parser::parse() {
+    std::vector<Stmt*> v;
+    while (!isAtEnd()) {
+        v.push_back(declaration());
+    }
+    
+    return v;
+}
+
+Stmt* Parser::declaration() {
+    try {   
+        if (match({TOK_VAR})) {
+            return varDeclaration();
+        }
+        return statement();
+    } catch(const ParseError& e) {
+        std::cerr << e.what() << '\n';
+        synchronize();
         return nullptr;
     }
+    
+}
+
+Stmt* Parser::statement() {
+    if (match({TOK_PRINT})) {
+        return printStatement();
+    }
+    return expressionStatement();
+}
+
+Stmt *Parser::varDeclaration()
+{
+    Token* name = consume(TOK_IDENTIFIER, "Expect variable name");
+
+    Expr* initializer = nullptr;
+    if (match({TOK_EQUAL})) {
+        initializer = expression();
+    }
+    consume(TOK_SEMICOLON, "Expect ';' after variable declaration");
+    return new Var{name, initializer};
+}
+
+Stmt *Parser::printStatement()
+{
+    Expr* value = expression();
+    consume(TOK_SEMICOLON, "Expect ';' after value.");
+    return new Print{value};
+}
+
+Stmt* Parser::expressionStatement() {
+    Expr* expr = expression();
+    consume(TOK_SEMICOLON, "Expect ';' after expression.");
+    return new Expression{expr};
 }
 
 Expr* Parser::expression() {
-        return equality();
+    return assignment();
+}
+
+Expr *Parser::assignment() {
+    Expr* expr = equality();
+    if (match({TOK_EQUAL})) {
+        Token* equals = previous();
+        Expr* value = assignment();
+
+        if (typeid(*expr) == typeid(Variable)) {
+            Token* name = ((Variable*)expr)->name;
+            return new Assign{name, value};
+        }
+        
+        error(equals, "Invalid assign target");
+    }
+    
+    return expr;
 }
 
 Expr* Parser::equality() {
@@ -76,11 +140,20 @@ Expr* Parser::primary() {
     if (match({TOK_NUMBER, TOK_STRING})) {
         return new Literal{previous()->getValue()};
     }
+
+
+    if (match({TOK_IDENTIFIER})) {
+        return new Variable{previous()};
+    }
+
     if (match({TOK_LEFT_PAREN})) {
         Expr* expr = expression();
         consume(TOK_RIGHT_PAREN, "Expect ')' after expression.");
         return new Grouping{expr};
     }
+
+    // TODO : fix this
+    return nullptr;
 }
 
 Parser::ParseError Parser::error(Token* token, const std::string& message) {

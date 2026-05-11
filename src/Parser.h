@@ -2,6 +2,7 @@
 
 #include "Expr.h"
 #include "Token.h"
+#include "Stmt.h"
 
 #include <vector>
 
@@ -14,14 +15,23 @@ private:
     int current = 0;
     
     class ParseError : public std::runtime_error {
-        public : ParseError(const std::string& message) : std::runtime_error(message) {}
+        public : ParseError(const std::string& message) : std::runtime_error(message) {
+            
+        }
     };
 public:
     Parser(std::vector<Token>& tokens) : tokens(tokens) {}
-    Expr* parse();
+    std::vector<Stmt*> parse();
 private:
+    Stmt* declaration();
+    Stmt* statement();
+
+    Stmt* varDeclaration();
+    Stmt* printStatement();
+    Stmt* expressionStatement();
+
     Expr* expression();
-    
+    Expr* assignment();
     Expr* equality();
     Expr* comparison();
     Expr* term();

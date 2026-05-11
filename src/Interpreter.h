@@ -1,15 +1,18 @@
 #pragma once
 #include "Expr.h"
+#include "Stmt.h"
+#include "Environment.h"
 
 #include <string>
 
-class Interpreter : public Visitor
+class Interpreter : public ExprVisitor, public StmtVisitor
 {
 private:
     std::any result;
+    Environment environment;
 public:
     Interpreter() {}
-    void interpret(Expr* expression);
+    void interpret(std::vector<Stmt*> statements);
     class RuntimeError : public std::runtime_error
     {
     private:
@@ -22,13 +25,19 @@ public:
         Token* getToken() {return tok;}
     };
 private:
+    void execute(Stmt* statement);
     std::any evaluate(Expr* expression);
 
 	void visit(Grouping& v) override;
 	void visit(Binary& v) override;
+	void visit(Assign& v) override;
 	void visit(Unary& v) override;
 	void visit(Literal& v) override;
+    void visit(Variable& v) override;
 
+    void visit(Print& v) override;
+    void visit(Var& v) override;
+    void visit(Expression& v) override;
 
     bool isTruthy(const std::any& value);
     bool isEqual(const std::any& left, const std::any& right);

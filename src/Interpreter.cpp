@@ -2,15 +2,21 @@
 
 #include "Application.h"
 
-void Interpreter::interpret(Expr* expression)
+void Interpreter::interpret(std::vector<Stmt*> statements)
 {
     try {
-        std::any value = evaluate(expression);
-        std::cout << stringfy(value) << std::endl;
+        for (Stmt* statment : statements) {
+            execute(statment);
+        }
     }
     catch (RuntimeError error) {
         Application::runtimeError(error);
     }
+}
+
+void Interpreter::execute(Stmt *statement)
+{
+    statement->accept(*this);
 }
 
 std::any Interpreter::evaluate(Expr *expression)
@@ -81,6 +87,11 @@ void Interpreter::visit(Binary& v) {
     }
 }
 
+void Interpreter::visit(Assign &v) {
+    std::any value = evaluate(v.value);
+    environment.assign(v.name, value);
+}
+
 void Interpreter::visit(Unary& v) {
     std::any right = evaluate(v.right);
 
@@ -101,6 +112,32 @@ void Interpreter::visit(Unary& v) {
 
 void Interpreter::visit(Literal& v) {
     result = v.value;
+}
+
+void Interpreter::visit(Variable &v)
+{
+    result = environment.get(v.name);
+}
+
+void Interpreter::visit(Print &v)
+{
+    std::any value = evaluate(v.expr);
+    std::cout << stringfy(value) << std::endl;
+}
+
+void Interpreter::visit(Var &v)
+{
+    std::any value = nullptr;
+    if (v.right != nullptr) {
+        value = evaluate(v.right);
+    }
+
+    environment.define(v.name->getLexeme(), value);
+}
+
+void Interpreter::visit(Expression &v)
+{
+    evaluate(v.expr);
 }
 
 bool Interpreter::isTruthy(const std::any& value)

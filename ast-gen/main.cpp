@@ -37,7 +37,7 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
         file << "\t\t" << "this->" << name << " = " << name << ";\n";
     }
     file << "\t}\n";
-    file << "\tvoid accept(Visitor& v) override {\n";
+    file << "\tvoid accept(" << baseName << "Visitor& v) override {\n";
 	file << "\t\tv.visit(*this);\n";
 
 	file << "\t}\n;";
@@ -66,7 +66,7 @@ static void defineAst(const std::string& outputDir, const std::string& baseName,
     }
 
     file_H << "\n";
-    file_H << "class Visitor {\n";
+    file_H << "class "<< baseName << "Visitor {\n";
     file_H << "public:\n";
     
     for (auto& type : types) {
@@ -82,8 +82,8 @@ static void defineAst(const std::string& outputDir, const std::string& baseName,
     file_H << "\n";
     file_H << "class " + baseName + " {\n";
     file_H << "public:\n";
-    file_H << "\tvirtual void accept(Visitor& v) = 0;\n";
-    file_H << "\t~Expr() = default;\n";
+    file_H << "\tvirtual void accept("  << baseName << "Visitor& v) = 0;\n";
+    file_H << "\t~" << baseName << "() = default;\n";
     file_H << "};\n\n";
     
     // Types
@@ -104,9 +104,17 @@ int main() {
     defineAst("../src", "Expr", 
     {
         "Grouping : Expr* expr",
+        "Assign : Token* name, Expr* value",
         "Binary : Expr* left, Token* op, Expr* right",
         "Unary : Token* op, Expr* right",
-        "Literal : std::any value"
-    }
-    );
+        "Literal : std::any value",
+        "Variable : Token* name"
+    });
+
+    defineAst("../src", "Stmt", 
+    {
+        "Expression : Expr* expr",
+        "Print : Expr* expr",
+        "Var : Token* name, Expr* right"
+    });
 }
