@@ -10,8 +10,10 @@ class Environment
 {
 private:
     std::map<std::string, std::any> values;
+    Environment* enclosing = nullptr;
 public:
     Environment() {}
+    Environment(Environment* enclosing) : enclosing(enclosing) {}
     ~Environment() {}
 
     void define(std::string name, std::any value);

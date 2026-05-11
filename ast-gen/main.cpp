@@ -115,6 +115,7 @@ int main() {
     {
         "Expression : Expr* expr",
         "Print : Expr* expr",
+        "Block : std::vector<Stmt*> statements",
         "Var : Token* name, Expr* right"
     });
 }

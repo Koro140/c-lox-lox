@@ -9,12 +9,14 @@
 
 class Expression;
 class Print;
+class Block;
 class Var;
 
 class StmtVisitor {
 public:
 	virtual void visit(Expression& v) = 0;
 	virtual void visit(Print& v) = 0;
+	virtual void visit(Block& v) = 0;
 	virtual void visit(Var& v) = 0;
 };
 
@@ -42,6 +44,18 @@ public:
 public:
 	Print(Expr* expr) {
 		this->expr = expr;
+	}
+	void accept(StmtVisitor& v) override {
+		v.visit(*this);
+	}
+;};
+
+class Block : public Stmt {
+public:
+	std::vector<Stmt*> statements;
+public:
+	Block(std::vector<Stmt*> statements) {
+		this->statements = statements;
 	}
 	void accept(StmtVisitor& v) override {
 		v.visit(*this);

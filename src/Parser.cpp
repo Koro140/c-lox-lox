@@ -29,6 +29,10 @@ Stmt* Parser::statement() {
     if (match({TOK_PRINT})) {
         return printStatement();
     }
+    if (match({TOK_LEFT_BRACE})) {
+        return new Block{block()};
+    }
+    
     return expressionStatement();
 }
 
@@ -49,6 +53,18 @@ Stmt *Parser::printStatement()
     Expr* value = expression();
     consume(TOK_SEMICOLON, "Expect ';' after value.");
     return new Print{value};
+}
+
+std::vector<Stmt *> Parser::block()
+{
+    std::vector<Stmt*> statements;
+
+    while (!check({TOK_RIGHT_BRACE}) && !isAtEnd()) {
+        statements.push_back(declaration());
+    }
+    
+    consume(TOK_RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
 }
 
 Stmt* Parser::expressionStatement() {

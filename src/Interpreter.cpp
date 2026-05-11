@@ -19,6 +19,17 @@ void Interpreter::execute(Stmt *statement)
     statement->accept(*this);
 }
 
+void Interpreter::executeBlock(const std::vector<Stmt *> &statements, std::unique_ptr<Environment> enclosing) {
+    Environment previous = this->environment;
+    
+    this->environment = enclosing.get();
+    for (Stmt* statement : statements) {
+        execute(statement);
+    }
+
+    this->environment = previous;
+}
+
 std::any Interpreter::evaluate(Expr *expression)
 {
     expression->accept(*this);
@@ -133,6 +144,11 @@ void Interpreter::visit(Var &v)
     }
 
     environment.define(v.name->getLexeme(), value);
+}
+
+void Interpreter::visit(Block &v)
+{
+    executeBlock(v.statements, std::make_unique<Environment>(this->environment));
 }
 
 void Interpreter::visit(Expression &v)

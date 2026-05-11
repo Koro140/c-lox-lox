@@ -28,6 +28,7 @@ private:
 
     Stmt* varDeclaration();
     Stmt* printStatement();
+    std::vector<Stmt*> block();
     Stmt* expressionStatement();
 
     Expr* expression();

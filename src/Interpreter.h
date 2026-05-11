@@ -4,6 +4,7 @@
 #include "Environment.h"
 
 #include <string>
+#include <memory>
 
 class Interpreter : public ExprVisitor, public StmtVisitor
 {
@@ -26,6 +27,7 @@ public:
     };
 private:
     void execute(Stmt* statement);
+    void executeBlock(const std::vector<Stmt*>& statements, std::unique_ptr<Environment> enclosing);
     std::any evaluate(Expr* expression);
 
 	void visit(Grouping& v) override;
@@ -37,6 +39,7 @@ private:
 
     void visit(Print& v) override;
     void visit(Var& v) override;
+    void visit(Block& v) override;
     void visit(Expression& v) override;
 
     bool isTruthy(const std::any& value);
@@ -56,6 +59,10 @@ private:
             return text;
         }
         
+        if (value.type() == typeid(bool)) {
+            return isTruthy(value) ? "true" : "false";
+        }
+
         return std::any_cast<std::string>(value);
     }
 };
