@@ -20,14 +20,14 @@ void Interpreter::execute(Stmt *statement)
 }
 
 void Interpreter::executeBlock(const std::vector<Stmt *> &statements, std::unique_ptr<Environment> enclosing) {
-    Environment previous = this->environment;
+    std::unique_ptr<Environment> previous = std::move(this->environment);
+    this->environment = std::move(enclosing);
     
-    this->environment = enclosing.get();
     for (Stmt* statement : statements) {
         execute(statement);
     }
 
-    this->environment = previous;
+    this->environment = std::move(previous);
 }
 
 std::any Interpreter::evaluate(Expr *expression)
@@ -100,7 +100,7 @@ void Interpreter::visit(Binary& v) {
 
 void Interpreter::visit(Assign &v) {
     std::any value = evaluate(v.value);
-    environment.assign(v.name, value);
+    environment->assign(v.name, value);
 }
 
 void Interpreter::visit(Unary& v) {
@@ -127,7 +127,7 @@ void Interpreter::visit(Literal& v) {
 
 void Interpreter::visit(Variable &v)
 {
-    result = environment.get(v.name);
+    result = environment->get(v.name);
 }
 
 void Interpreter::visit(Print &v)
@@ -143,12 +143,12 @@ void Interpreter::visit(Var &v)
         value = evaluate(v.right);
     }
 
-    environment.define(v.name->getLexeme(), value);
+    environment->define(v.name->getLexeme(), value);
 }
 
 void Interpreter::visit(Block &v)
 {
-    executeBlock(v.statements, std::make_unique<Environment>(this->environment));
+    executeBlock(v.statements, std::make_unique<Environment>(this->environment.get()));
 }
 
 void Interpreter::visit(Expression &v)

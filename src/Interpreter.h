@@ -10,9 +10,13 @@ class Interpreter : public ExprVisitor, public StmtVisitor
 {
 private:
     std::any result;
-    Environment environment;
+    std::unique_ptr<Environment> environment;
 public:
-    Interpreter() {}
+    
+    Interpreter() {
+        environment = std::make_unique<Environment>();
+    }
+
     void interpret(std::vector<Stmt*> statements);
     class RuntimeError : public std::runtime_error
     {
