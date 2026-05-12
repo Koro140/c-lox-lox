@@ -28,7 +28,9 @@ private:
 
     Stmt* varDeclaration();
     Stmt* ifStatement();
+    Stmt* forStatement();
     Stmt* printStatement();
+    Stmt* whileStatement();
     std::vector<Stmt*> block();
     Stmt* expressionStatement();
 

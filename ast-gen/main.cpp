@@ -116,6 +116,7 @@ int main() {
     {
         "Expression : Expr* expr",
         "Print : Expr* expr",
+        "While: Expr* condition, Stmt* body",
         "Block : std::vector<Stmt*> statements",
         "If: Expr* condition, Stmt* thenBranch, Stmt* elseBranch",
         "Var : Token* name, Expr* right"

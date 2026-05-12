@@ -26,6 +26,11 @@ Stmt* Parser::declaration() {
 }
 
 Stmt* Parser::statement() {
+    if (match({TOK_FOR}))
+    {
+        return forStatement();
+    }
+    
     if (match({TOK_IF})) {
         return ifStatement();
     }
@@ -33,6 +38,11 @@ Stmt* Parser::statement() {
     if (match({TOK_PRINT})) {
         return printStatement();
     }
+    if (match({TOK_WHILE}))
+    {
+        return whileStatement();
+    }
+    
     if (match({TOK_LEFT_BRACE})) {
         return new Block{block()};
     }
@@ -67,11 +77,66 @@ Stmt *Parser::ifStatement() {
     return new If{condition, thenBranch, elseBranch};
 }
 
+Stmt *Parser::forStatement()
+{
+    consume(TOK_LEFT_PAREN, "Expect '(' after 'for'");
+
+    Stmt* initializer = nullptr;
+    if (match({TOK_SEMICOLON})) {
+        initializer = nullptr;
+    } else if (match({TOK_VAR})) {
+        initializer = varDeclaration();
+    } else {
+        initializer = expressionStatement();
+    }
+    
+    Expr* condition = nullptr;
+    if (!check(TOK_SEMICOLON)) {
+        condition = expression();
+    }
+    
+    consume(TOK_SEMICOLON, "Expect ';' after loop condition.");
+    
+    Expr* increment = nullptr;
+    if (!check(TOK_RIGHT_PAREN)) {
+        increment = expression();
+    }
+    consume(TOK_RIGHT_PAREN, "Expect ')' after for clauses.");
+    
+    Stmt* body = statement();
+
+    if (increment != nullptr) {
+        body = new Block{{body, new Expression(increment)}};
+    }
+    
+    if (condition == nullptr) {
+        condition = new Literal{true};
+    }
+    body = new While{condition, body};
+
+    if (initializer != nullptr) {
+        body = new Block{{initializer, body}};
+    }
+
+    return body;
+}
+
 Stmt *Parser::printStatement()
 {
     Expr* value = expression();
     consume(TOK_SEMICOLON, "Expect ';' after value.");
     return new Print{value};
+}
+
+Stmt *Parser::whileStatement()
+{
+    consume(TOK_LEFT_PAREN, "Expect '(' after 'while'.");
+    Expr* condition = expression();
+    consume(TOK_RIGHT_PAREN, "Expect ')' after condition.");
+
+    Stmt* body = statement();
+    
+    return new While{condition, body};
 }
 
 std::vector<Stmt *> Parser::block()

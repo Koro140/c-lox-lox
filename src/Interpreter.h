@@ -43,6 +43,7 @@ private:
     void visit(Variable& v) override;
 
     void visit(Print& v) override;
+    void visit(While& v) override;
     void visit(Var& v) override;
     void visit(If& v) override;
     void visit(Block& v) override;

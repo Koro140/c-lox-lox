@@ -155,6 +155,13 @@ void Interpreter::visit(Print &v)
     std::cout << stringfy(value) << std::endl;
 }
 
+void Interpreter::visit(While &v)
+{
+    while(isTruthy(evaluate(v.condition))) {
+        execute(v.body);
+    }
+}
+
 void Interpreter::visit(Var &v)
 {
     std::any value = nullptr;
