@@ -26,6 +26,10 @@ Stmt* Parser::declaration() {
 }
 
 Stmt* Parser::statement() {
+    if (match({TOK_IF})) {
+        return ifStatement();
+    }
+    
     if (match({TOK_PRINT})) {
         return printStatement();
     }
@@ -46,6 +50,21 @@ Stmt *Parser::varDeclaration()
     }
     consume(TOK_SEMICOLON, "Expect ';' after variable declaration");
     return new Var{name, initializer};
+}
+
+Stmt *Parser::ifStatement() {
+    consume(TOK_LEFT_PAREN, "Expect '(' after 'if'.");
+    Expr* condition = expression();
+    consume(TOK_RIGHT_PAREN, "Expect ')' after if condition.");
+
+    Stmt* thenBranch = statement();
+    Stmt* elseBranch = nullptr;
+
+    if (match({TOK_ELSE})) {
+        elseBranch = statement();
+    }
+    
+    return new If{condition, thenBranch, elseBranch};
 }
 
 Stmt *Parser::printStatement()
@@ -78,7 +97,7 @@ Expr* Parser::expression() {
 }
 
 Expr *Parser::assignment() {
-    Expr* expr = equality();
+    Expr* expr = logic_or();
     if (match({TOK_EQUAL})) {
         Token* equals = previous();
         Expr* value = assignment();
@@ -87,8 +106,31 @@ Expr *Parser::assignment() {
             Token* name = ((Variable*)expr)->name;
             return new Assign{name, value};
         }
-        
         error(equals, "Invalid assign target");
+    }
+    
+    return expr;
+}
+
+Expr *Parser::logic_or()
+{
+    Expr* expr = logic_and();
+    while (match({TOK_OR})) {
+        Token* op = previous();
+        Expr* right = logic_and();
+        expr = new Logical{expr, op, right};
+    }
+    
+    return expr;
+}
+
+Expr *Parser::logic_and()
+{
+    Expr* expr = equality();
+    while (match({TOK_AND})) {
+        Token* op = previous();
+        Expr* right = equality();
+        expr = new Logical{expr, op, right};
     }
     
     return expr;

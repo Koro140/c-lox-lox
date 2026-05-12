@@ -5,6 +5,9 @@ Application* s_Application = nullptr;
 Application::Application(int argc, char** argv) {
     s_Application = this;
     
+    runFile("script.lox");
+    return;
+
     if (argc > 2) {
         std::cerr << "Usage : cpp-lox [script]" << std::endl;
         exit(64);

@@ -1,3 +1,7 @@
-var x = 13 + 12 / (13 + 21);
+var x = 13;
+var y = 10;
 
-print x;
+if (x >= 10) {
+    print "X is greater than 10";
+    if (y == 10) print "and Y is 10";
+}

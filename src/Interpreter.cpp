@@ -16,10 +16,7 @@ void Interpreter::interpret(std::vector<Stmt*> statements)
 
 void Interpreter::execute(Stmt *statement)
 {
-    if (statement != nullptr)
-    {
-        statement->accept(*this);
-    }
+    statement->accept(*this);
 }
 
 void Interpreter::executeBlock(const std::vector<Stmt *> &statements, std::unique_ptr<Environment> enclosing) {
@@ -81,11 +78,11 @@ void Interpreter::visit(Binary& v) {
         return;
     case TOK_GREATER:
         checkNumberOperands(*v.op, left, right);
-        result = std::any_cast<double>(left) < std::any_cast<double>(right); 
+        result = std::any_cast<double>(left) > std::any_cast<double>(right); 
         return;
     case TOK_GREATER_EQUAL:
         checkNumberOperands(*v.op, left, right);
-        result = std::any_cast<double>(left) <= std::any_cast<double>(right); 
+        result = std::any_cast<double>(left) >= std::any_cast<double>(right); 
         return;
 
     
@@ -99,6 +96,25 @@ void Interpreter::visit(Binary& v) {
     default:
         break;
     }
+}
+
+void Interpreter::visit(Logical &v)
+{
+    std::any left = evaluate(v.left);
+    if (v.op->getType() == TOK_OR) {
+        if (isTruthy(left)) {
+            result = left;
+            return;
+        }
+    } else {
+        if (!isTruthy(left)) {
+            result = left;
+            return;
+        }
+    }
+    
+    result = evaluate(v.right);
+    return;
 }
 
 void Interpreter::visit(Assign &v) {
@@ -147,6 +163,17 @@ void Interpreter::visit(Var &v)
     }
 
     environment->define(v.name->getLexeme(), value);
+}
+
+void Interpreter::visit(If &v)
+{
+    if (isTruthy(evaluate(v.condition))) {
+        execute(v.thenBranch);
+    } else {
+        if (v.elseBranch != nullptr) {
+            execute(v.elseBranch);
+        }
+    }
 }
 
 void Interpreter::visit(Block &v)

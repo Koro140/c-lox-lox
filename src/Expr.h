@@ -10,6 +10,7 @@
 class Grouping;
 class Assign;
 class Binary;
+class Logical;
 class Unary;
 class Literal;
 class Variable;
@@ -19,6 +20,7 @@ public:
 	virtual void visit(Grouping& v) = 0;
 	virtual void visit(Assign& v) = 0;
 	virtual void visit(Binary& v) = 0;
+	virtual void visit(Logical& v) = 0;
 	virtual void visit(Unary& v) = 0;
 	virtual void visit(Literal& v) = 0;
 	virtual void visit(Variable& v) = 0;
@@ -63,6 +65,22 @@ public:
 	Expr* right;
 public:
 	Binary(Expr* left, Token* op, Expr* right) {
+		this->left = left;
+		this->op = op;
+		this->right = right;
+	}
+	void accept(ExprVisitor& v) override {
+		v.visit(*this);
+	}
+;};
+
+class Logical : public Expr {
+public:
+	Expr* left;
+	Token* op;
+	Expr* right;
+public:
+	Logical(Expr* left, Token* op, Expr* right) {
 		this->left = left;
 		this->op = op;
 		this->right = right;

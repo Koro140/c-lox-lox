@@ -10,6 +10,7 @@
 class Expression;
 class Print;
 class Block;
+class If;
 class Var;
 
 class StmtVisitor {
@@ -17,6 +18,7 @@ public:
 	virtual void visit(Expression& v) = 0;
 	virtual void visit(Print& v) = 0;
 	virtual void visit(Block& v) = 0;
+	virtual void visit(If& v) = 0;
 	virtual void visit(Var& v) = 0;
 };
 
@@ -56,6 +58,22 @@ public:
 public:
 	Block(std::vector<Stmt*> statements) {
 		this->statements = statements;
+	}
+	void accept(StmtVisitor& v) override {
+		v.visit(*this);
+	}
+;};
+
+class If : public Stmt {
+public:
+	Expr* condition;
+	Stmt* thenBranch;
+	Stmt* elseBranch;
+public:
+	If(Expr* condition, Stmt* thenBranch, Stmt* elseBranch) {
+		this->condition = condition;
+		this->thenBranch = thenBranch;
+		this->elseBranch = elseBranch;
 	}
 	void accept(StmtVisitor& v) override {
 		v.visit(*this);

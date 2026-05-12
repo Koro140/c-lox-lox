@@ -27,12 +27,15 @@ private:
     Stmt* statement();
 
     Stmt* varDeclaration();
+    Stmt* ifStatement();
     Stmt* printStatement();
     std::vector<Stmt*> block();
     Stmt* expressionStatement();
 
     Expr* expression();
     Expr* assignment();
+    Expr* logic_or();
+    Expr* logic_and();
     Expr* equality();
     Expr* comparison();
     Expr* term();

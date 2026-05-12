@@ -106,6 +106,7 @@ int main() {
         "Grouping : Expr* expr",
         "Assign : Token* name, Expr* value",
         "Binary : Expr* left, Token* op, Expr* right",
+        "Logical : Expr* left, Token* op, Expr* right",
         "Unary : Token* op, Expr* right",
         "Literal : std::any value",
         "Variable : Token* name"
@@ -116,6 +117,7 @@ int main() {
         "Expression : Expr* expr",
         "Print : Expr* expr",
         "Block : std::vector<Stmt*> statements",
+        "If: Expr* condition, Stmt* thenBranch, Stmt* elseBranch",
         "Var : Token* name, Expr* right"
     });
 }

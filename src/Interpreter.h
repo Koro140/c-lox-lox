@@ -36,6 +36,7 @@ private:
 
 	void visit(Grouping& v) override;
 	void visit(Binary& v) override;
+    void visit(Logical& v) override;
 	void visit(Assign& v) override;
 	void visit(Unary& v) override;
 	void visit(Literal& v) override;
@@ -43,6 +44,7 @@ private:
 
     void visit(Print& v) override;
     void visit(Var& v) override;
+    void visit(If& v) override;
     void visit(Block& v) override;
     void visit(Expression& v) override;
 
