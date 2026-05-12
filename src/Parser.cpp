@@ -59,7 +59,7 @@ std::vector<Stmt *> Parser::block()
 {
     std::vector<Stmt*> statements;
 
-    while (!check({TOK_RIGHT_BRACE}) && !isAtEnd()) {
+    while (!check(TOK_RIGHT_BRACE) && !isAtEnd()) {
         statements.push_back(declaration());
     }
     
@@ -174,7 +174,7 @@ Expr* Parser::primary() {
 
 Parser::ParseError Parser::error(Token* token, const std::string& message) {
     Application::error(token, message);
-    return {"Runtime Error"};
+    return {"Parser Error"};
 }
 
 Token* Parser::consume(TokenType type, std::string message) {

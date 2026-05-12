@@ -1,3 +1,3 @@
-- Fix the Application.h and move the implementations to Application.cpp
+- Fix the Application.h and move the implementations to Application.cpp (done)
 - Fix the sig faults that infects the Interpreter
 - Use smart pointers instead of raw

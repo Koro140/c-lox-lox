@@ -16,7 +16,10 @@ void Interpreter::interpret(std::vector<Stmt*> statements)
 
 void Interpreter::execute(Stmt *statement)
 {
-    statement->accept(*this);
+    if (statement != nullptr)
+    {
+        statement->accept(*this);
+    }
 }
 
 void Interpreter::executeBlock(const std::vector<Stmt *> &statements, std::unique_ptr<Environment> enclosing) {
