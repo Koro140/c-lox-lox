@@ -24,7 +24,7 @@ To run in interactive mode
 ```
 
 ### AST Builder
-To generate the Expr.h file build and run
+To generate the Expr.h and Stmt.h files build and run
 ```bash
 ./build/AST_Gen
 ```
