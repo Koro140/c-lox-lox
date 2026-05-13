@@ -10,11 +10,11 @@ class Interpreter : public ExprVisitor, public StmtVisitor
 {
 private:
     std::any result;
-    std::unique_ptr<Environment> environment;
+    std::shared_ptr<Environment> environment;
 public:
     
     Interpreter() {
-        environment = std::make_unique<Environment>();
+        environment = std::make_shared<Environment>();
     }
 
     void interpret(std::vector<Stmt*> statements);
@@ -31,7 +31,7 @@ public:
     };
 private:
     void execute(Stmt* statement);
-    void executeBlock(const std::vector<Stmt*>& statements, std::unique_ptr<Environment> enclosing);
+    void executeBlock(const std::vector<Stmt*>& statements, std::shared_ptr<Environment> enclosing);
     std::any evaluate(Expr* expression);
 
 	void visit(Grouping& v) override;

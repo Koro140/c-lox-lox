@@ -19,15 +19,15 @@ void Interpreter::execute(Stmt *statement)
     statement->accept(*this);
 }
 
-void Interpreter::executeBlock(const std::vector<Stmt *> &statements, std::unique_ptr<Environment> enclosing) {
-    std::unique_ptr<Environment> previous = std::move(this->environment);
-    this->environment = std::move(enclosing);
+void Interpreter::executeBlock(const std::vector<Stmt *> &statements, std::shared_ptr<Environment> enclosing) {
+    std::shared_ptr<Environment> previous = this->environment;
+    this->environment = enclosing;
     
     for (Stmt* statement : statements) {
         execute(statement);
     }
 
-    this->environment = std::move(previous);
+    this->environment = previous;
 }
 
 std::any Interpreter::evaluate(Expr *expression)
@@ -185,7 +185,7 @@ void Interpreter::visit(If &v)
 
 void Interpreter::visit(Block &v)
 {
-    executeBlock(v.statements, std::make_unique<Environment>(this->environment.get()));
+    executeBlock(v.statements, std::make_shared<Environment>(this->environment));
 }
 
 void Interpreter::visit(Expression &v)

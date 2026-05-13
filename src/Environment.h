@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <any>
+#include <memory>
 
 #include "Token.h"
 
@@ -10,11 +11,13 @@ class Environment
 {
 private:
     std::map<std::string, std::any> values;
-    Environment* enclosing = nullptr;
+    std::shared_ptr<Environment> enclosing = nullptr;
 public:
     Environment() {}
-    Environment(Environment* enclosing) : enclosing(enclosing) {}
-    ~Environment() {}
+    Environment(std::shared_ptr<Environment> enclosing) : enclosing(enclosing) {}
+    ~Environment() {
+        std::cout << "Env destroyed\n";
+    }
 
     void define(std::string name, std::any value);
     std::any get(Token* name);
