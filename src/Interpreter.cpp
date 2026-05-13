@@ -132,7 +132,7 @@ void Interpreter::visit(Unary& v) {
         result = -std::any_cast<double>(right);
         return;
     case TOK_BANG:
-        result = !isTruthy(result);
+        result = !isTruthy(right);
 
         return;
     default:
