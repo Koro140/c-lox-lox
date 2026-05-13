@@ -23,25 +23,28 @@ void Interpreter::execute(Stmt *statement)
 void Interpreter::executeBlock(const std::vector<Stmt *> &statements, std::shared_ptr<Environment> enclosing) {
     std::shared_ptr<Environment> previous = this->environment;
     this->environment = enclosing;
-    
-    for (Stmt* statement : statements) {
-        execute(statement);
+    try {
+        for (Stmt* statement : statements) {
+            execute(statement);
+        }
+    } catch (...) {
+        this->environment = previous;
+        throw;
     }
-
+    
     this->environment = previous;
 }
 
 std::any Interpreter::evaluate(Expr *expression)
 {
-    expression->accept(*this);
-    return result;
+    return expression->accept(*this);
 }
 
-void Interpreter::visit(Grouping& v) {
-    result = evaluate(v.expr);
+std::any Interpreter::visit(Grouping& v) {
+    return evaluate(v.expr);
 }
 
-void Interpreter::visit(Binary& v) {
+std::any Interpreter::visit(Binary& v) {
     std::any left = evaluate(v.left);
     std::any right = evaluate(v.right);
 
@@ -49,57 +52,47 @@ void Interpreter::visit(Binary& v) {
     {
     case TOK_MINUS:
         checkNumberOperands(*v.op, left, right);
-        result = std::any_cast<double>(left) - std::any_cast<double>(right); 
-        return;
+        return std::any_cast<double>(left) - std::any_cast<double>(right); 
     case TOK_SLASH:
         checkNumberOperands(*v.op, left, right);
-        result = std::any_cast<double>(left) / std::any_cast<double>(right); 
-        return;
+        return std::any_cast<double>(left) / std::any_cast<double>(right); 
     case TOK_STAR:
         checkNumberOperands(*v.op, left, right);
-        result = std::any_cast<double>(left) * std::any_cast<double>(right); 
-        return;
+        return std::any_cast<double>(left) * std::any_cast<double>(right);
     case TOK_PLUS:
         if (left.type() == typeid(double) && right.type() == typeid(double)) {
-            result = std::any_cast<double>(left) + std::any_cast<double>(right);
-            return;
+            return std::any_cast<double>(left) + std::any_cast<double>(right);
         } 
         if (left.type() == typeid(std::string) && right.type() == typeid(std::string)) {
-            result = std::any_cast<std::string>(left) + std::any_cast<std::string>(right);
-            return;
+            return std::any_cast<std::string>(left) + std::any_cast<std::string>(right);
         }
         break;
     case TOK_LESS:
         checkNumberOperands(*v.op, left, right);
-        result = std::any_cast<double>(left) < std::any_cast<double>(right); 
-        return;
+        return std::any_cast<double>(left) < std::any_cast<double>(right); 
     case TOK_LESS_EQUAL:
         checkNumberOperands(*v.op, left, right);
-        result = std::any_cast<double>(left) <= std::any_cast<double>(right); 
-        return;
+        return std::any_cast<double>(left) <= std::any_cast<double>(right); 
     case TOK_GREATER:
         checkNumberOperands(*v.op, left, right);
-        result = std::any_cast<double>(left) > std::any_cast<double>(right); 
-        return;
+        return std::any_cast<double>(left) > std::any_cast<double>(right); 
     case TOK_GREATER_EQUAL:
         checkNumberOperands(*v.op, left, right);
-        result = std::any_cast<double>(left) >= std::any_cast<double>(right); 
-        return;
+        return std::any_cast<double>(left) >= std::any_cast<double>(right); 
 
     
     case TOK_BANG_EQUAL:
-        result = !isEqual(left, right);
-        return;
+        return !isEqual(left, right);
     case TOK_EQUAL_EQUAL:
-        result = isEqual(left, right);
-        return;
+        return isEqual(left, right);
+        
         
     default:
         break;
     }
 }
 
-void Interpreter::visit(Call &v)
+std::any Interpreter::visit(Call &v)
 {
     std::any callee = evaluate(v.calle);
     std::vector<std::any> arguments;
@@ -120,75 +113,86 @@ void Interpreter::visit(Call &v)
             std::to_string(arguments.size()) + ".");
     }
     
-    result = function->call(this, arguments);
-    return;
+    return function->call(this, arguments);
 }
 
-void Interpreter::visit(Logical &v)
+std::any Interpreter::visit(Logical &v)
 {
     std::any left = evaluate(v.left);
     if (v.op->getType() == TOK_OR) {
         if (isTruthy(left)) {
-            result = left;
-            return;
+            return left;
         }
     } else {
         if (!isTruthy(left)) {
-            result = left;
-            return;
+            return left;
         }
     }
     
-    result = evaluate(v.right);
-    return;
+    return evaluate(v.right);
 }
 
-void Interpreter::visit(Assign &v) {
+std::any Interpreter::visit(Assign &v) {
     std::any value = evaluate(v.value);
     environment->assign(v.name, value);
+
+    return value;
 }
 
-void Interpreter::visit(Unary& v) {
+std::any Interpreter::visit(Unary& v) {
     std::any right = evaluate(v.right);
 
     switch (v.op->getType())
     {
     case TOK_MINUS:
         checkNumberOperand(*v.op, right);
-        result = -std::any_cast<double>(right);
-        return;
+        return -std::any_cast<double>(right);
     case TOK_BANG:
-        result = !isTruthy(right);
-
-        return;
+        return !isTruthy(right);
     default:
         break;
     }
+    return right;
 }
 
-void Interpreter::visit(Literal& v) {
-    result = v.value;
+std::any Interpreter::visit(Literal& v) {
+    return v.value;
 }
 
-void Interpreter::visit(Variable &v)
+std::any Interpreter::visit(Variable &v)
 {
-    result = environment->get(v.name);
+    return environment->get(v.name);
 }
 
-void Interpreter::visit(Print &v)
+std::any Interpreter::visit(Print &v)
 {
     std::any value = evaluate(v.expr);
     std::cout << stringfy(value) << std::endl;
+
+    return nullptr;
 }
 
-void Interpreter::visit(While &v)
+std::any Interpreter::visit(Return &v)
+{
+    std::any value = nullptr;
+    if (v.value != nullptr)
+    {
+        value = evaluate(v.value);
+    }
+    
+    throw ReturnThrow{value};
+}
+
+std::any Interpreter::visit(While &v)
 {
     while(isTruthy(evaluate(v.condition))) {
         execute(v.body);
     }
+
+    return nullptr;
 }
 
-void Interpreter::visit(Var &v)
+std::any Interpreter::visit(Var &v)
 {
     std::any value = nullptr;
     if (v.right != nullptr) {
@@ -196,9 +200,11 @@ void Interpreter::visit(Var &v)
     }
 
     environment->define(v.name->getLexeme(), value);
+
+    return nullptr;
 }
 
-void Interpreter::visit(If &v)
+std::any Interpreter::visit(If &v)
 {
     if (isTruthy(evaluate(v.condition))) {
         execute(v.thenBranch);
@@ -207,22 +213,28 @@ void Interpreter::visit(If &v)
             execute(v.elseBranch);
         }
     }
+
+    return nullptr;
 }
 
-void Interpreter::visit(Block &v)
+std::any Interpreter::visit(Block &v)
 {
     executeBlock(v.statements, std::make_shared<Environment>(this->environment));
+
+    return nullptr;
 }
 
-void Interpreter::visit(Expression &v)
+std::any Interpreter::visit(Expression &v)
 {
-    evaluate(v.expr);
+    return evaluate(v.expr);
 }
 
-void Interpreter::visit(Function &v)
+std::any Interpreter::visit(Function &v)
 {
-    std::shared_ptr<LoxCallable> function = std::make_shared<LoxFunction>(&v);
+    std::shared_ptr<LoxCallable> function = std::make_shared<LoxFunction>(&v, environment);
     environment->define(v.name->getLexeme(), function);
+
+    return nullptr;
 }
 
 bool Interpreter::isTruthy(const std::any& value)

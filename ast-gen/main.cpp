@@ -37,8 +37,8 @@ void defineType(std::ofstream& file, const std::string& baseName, const std::str
         file << "\t\t" << "this->" << name << " = " << name << ";\n";
     }
     file << "\t}\n";
-    file << "\tvoid accept(" << baseName << "Visitor& v) override {\n";
-	file << "\t\tv.visit(*this);\n";
+    file << "\tstd::any accept(" << baseName << "Visitor& v) override {\n";
+	file << "\t\treturn v.visit(*this);\n";
 
 	file << "\t}\n;";
     file << "};\n\n";
@@ -73,7 +73,7 @@ static void defineAst(const std::string& outputDir, const std::string& baseName,
         std::stringstream ss(type);
         std::string className;
         std::getline(ss, className, ':');
-        file_H << "\tvirtual void visit(" << trim(className) << "& v) = 0;\n";
+        file_H << "\tvirtual std::any visit(" << trim(className) << "& v) = 0;\n";
     }
     file_H << "};\n";
 
@@ -82,7 +82,7 @@ static void defineAst(const std::string& outputDir, const std::string& baseName,
     file_H << "\n";
     file_H << "class " + baseName + " {\n";
     file_H << "public:\n";
-    file_H << "\tvirtual void accept("  << baseName << "Visitor& v) = 0;\n";
+    file_H << "\tvirtual std::any accept("  << baseName << "Visitor& v) = 0;\n";
     file_H << "\t~" << baseName << "() = default;\n";
     file_H << "};\n\n";
     
@@ -117,6 +117,7 @@ int main() {
     {
         "Expression : Expr* expr",
         "Print : Expr* expr",
+        "Return : Token* keyword, Expr* value",
         "Function : Token* name, std::vector<Token*> params, std::vector<Stmt*> body",
         "While: Expr* condition, Stmt* body",
         "Block : std::vector<Stmt*> statements",

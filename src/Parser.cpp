@@ -43,6 +43,11 @@ Stmt* Parser::statement() {
     if (match({TOK_PRINT})) {
         return printStatement();
     }
+    if (match({TOK_RETURN}))
+    {
+        return returnStatement();
+    }
+    
     if (match({TOK_WHILE}))
     {
         return whileStatement();
@@ -156,6 +161,21 @@ Stmt *Parser::printStatement()
     Expr* value = expression();
     consume(TOK_SEMICOLON, "Expect ';' after value.");
     return new Print{value};
+}
+
+Stmt *Parser::returnStatement()
+{
+    Token* keyword = previous();
+    Expr* value = nullptr;
+
+    if (!check(TOK_SEMICOLON))
+    {
+        value = expression();
+    }
+
+    consume(TOK_SEMICOLON, "Expect ';' after return value.");
+
+    return new Return{keyword, value};
 }
 
 Stmt *Parser::whileStatement()

@@ -18,19 +18,19 @@ class Variable;
 
 class ExprVisitor {
 public:
-	virtual void visit(Grouping& v) = 0;
-	virtual void visit(Assign& v) = 0;
-	virtual void visit(Binary& v) = 0;
-	virtual void visit(Call& v) = 0;
-	virtual void visit(Logical& v) = 0;
-	virtual void visit(Unary& v) = 0;
-	virtual void visit(Literal& v) = 0;
-	virtual void visit(Variable& v) = 0;
+	virtual std::any visit(Grouping& v) = 0;
+	virtual std::any visit(Assign& v) = 0;
+	virtual std::any visit(Binary& v) = 0;
+	virtual std::any visit(Call& v) = 0;
+	virtual std::any visit(Logical& v) = 0;
+	virtual std::any visit(Unary& v) = 0;
+	virtual std::any visit(Literal& v) = 0;
+	virtual std::any visit(Variable& v) = 0;
 };
 
 class Expr {
 public:
-	virtual void accept(ExprVisitor& v) = 0;
+	virtual std::any accept(ExprVisitor& v) = 0;
 	~Expr() = default;
 };
 
@@ -41,8 +41,8 @@ public:
 	Grouping(Expr* expr) {
 		this->expr = expr;
 	}
-	void accept(ExprVisitor& v) override {
-		v.visit(*this);
+	std::any accept(ExprVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -55,8 +55,8 @@ public:
 		this->name = name;
 		this->value = value;
 	}
-	void accept(ExprVisitor& v) override {
-		v.visit(*this);
+	std::any accept(ExprVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -71,8 +71,8 @@ public:
 		this->op = op;
 		this->right = right;
 	}
-	void accept(ExprVisitor& v) override {
-		v.visit(*this);
+	std::any accept(ExprVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -87,8 +87,8 @@ public:
 		this->paren = paren;
 		this->arguments = arguments;
 	}
-	void accept(ExprVisitor& v) override {
-		v.visit(*this);
+	std::any accept(ExprVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -103,8 +103,8 @@ public:
 		this->op = op;
 		this->right = right;
 	}
-	void accept(ExprVisitor& v) override {
-		v.visit(*this);
+	std::any accept(ExprVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -117,8 +117,8 @@ public:
 		this->op = op;
 		this->right = right;
 	}
-	void accept(ExprVisitor& v) override {
-		v.visit(*this);
+	std::any accept(ExprVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -129,8 +129,8 @@ public:
 	Literal(std::any value) {
 		this->value = value;
 	}
-	void accept(ExprVisitor& v) override {
-		v.visit(*this);
+	std::any accept(ExprVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -141,8 +141,8 @@ public:
 	Variable(Token* name) {
 		this->name = name;
 	}
-	void accept(ExprVisitor& v) override {
-		v.visit(*this);
+	std::any accept(ExprVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 

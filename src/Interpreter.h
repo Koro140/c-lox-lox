@@ -7,7 +7,7 @@
 #include <string>
 #include <memory>
 #include <ctime>
-
+#include <cmath>
 class Interpreter : public ExprVisitor, public StmtVisitor
 {
 public:
@@ -57,22 +57,23 @@ private:
     void execute(Stmt* statement);
     std::any evaluate(Expr* expression);
 
-	void visit(Grouping& v) override;
-	void visit(Binary& v) override;
-	void visit(Call& v) override;
-    void visit(Logical& v) override;
-	void visit(Assign& v) override;
-	void visit(Unary& v) override;
-	void visit(Literal& v) override;
-    void visit(Variable& v) override;
+	std::any visit(Grouping& v) override;
+	std::any visit(Binary& v) override;
+	std::any visit(Call& v) override;
+    std::any visit(Logical& v) override;
+	std::any visit(Assign& v) override;
+	std::any visit(Unary& v) override;
+	std::any visit(Literal& v) override;
+    std::any visit(Variable& v) override;
 
-    void visit(Print& v) override;
-    void visit(While& v) override;
-    void visit(Var& v) override;
-    void visit(If& v) override;
-    void visit(Block& v) override;
-    void visit(Expression& v) override;
-    void visit(Function& v) override;
+    std::any visit(Print& v) override;
+    std::any visit(Return& v) override;
+    std::any visit(While& v) override;
+    std::any visit(Var& v) override;
+    std::any visit(If& v) override;
+    std::any visit(Block& v) override;
+    std::any visit(Expression& v) override;
+    std::any visit(Function& v) override;
 
     bool isTruthy(const std::any& value);
     bool isEqual(const std::any& left, const std::any& right);
@@ -84,11 +85,12 @@ private:
             return "nil";
         }
         if (value.type() == typeid(double)) {
-            std::string text = std::to_string(std::any_cast<double>(value));
-            if (text.ends_with(".0")) {
-                text = text.substr(0, text.length() - 2);
+            double d = std::any_cast<double>(value);
+            // Check if it's a whole number
+            if (d == std::floor(d)) {
+                return std::to_string((long long)d);
             }
-            return text;
+            return std::to_string(d);
         }
         
         if (value.type() == typeid(bool)) {

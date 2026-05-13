@@ -9,6 +9,7 @@
 
 class Expression;
 class Print;
+class Return;
 class Function;
 class While;
 class Block;
@@ -17,18 +18,19 @@ class Var;
 
 class StmtVisitor {
 public:
-	virtual void visit(Expression& v) = 0;
-	virtual void visit(Print& v) = 0;
-	virtual void visit(Function& v) = 0;
-	virtual void visit(While& v) = 0;
-	virtual void visit(Block& v) = 0;
-	virtual void visit(If& v) = 0;
-	virtual void visit(Var& v) = 0;
+	virtual std::any visit(Expression& v) = 0;
+	virtual std::any visit(Print& v) = 0;
+	virtual std::any visit(Return& v) = 0;
+	virtual std::any visit(Function& v) = 0;
+	virtual std::any visit(While& v) = 0;
+	virtual std::any visit(Block& v) = 0;
+	virtual std::any visit(If& v) = 0;
+	virtual std::any visit(Var& v) = 0;
 };
 
 class Stmt {
 public:
-	virtual void accept(StmtVisitor& v) = 0;
+	virtual std::any accept(StmtVisitor& v) = 0;
 	~Stmt() = default;
 };
 
@@ -39,8 +41,8 @@ public:
 	Expression(Expr* expr) {
 		this->expr = expr;
 	}
-	void accept(StmtVisitor& v) override {
-		v.visit(*this);
+	std::any accept(StmtVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -51,8 +53,22 @@ public:
 	Print(Expr* expr) {
 		this->expr = expr;
 	}
-	void accept(StmtVisitor& v) override {
-		v.visit(*this);
+	std::any accept(StmtVisitor& v) override {
+		return v.visit(*this);
+	}
+;};
+
+class Return : public Stmt {
+public:
+	Token* keyword;
+	Expr* value;
+public:
+	Return(Token* keyword, Expr* value) {
+		this->keyword = keyword;
+		this->value = value;
+	}
+	std::any accept(StmtVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -67,8 +83,8 @@ public:
 		this->params = params;
 		this->body = body;
 	}
-	void accept(StmtVisitor& v) override {
-		v.visit(*this);
+	std::any accept(StmtVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -81,8 +97,8 @@ public:
 		this->condition = condition;
 		this->body = body;
 	}
-	void accept(StmtVisitor& v) override {
-		v.visit(*this);
+	std::any accept(StmtVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -93,8 +109,8 @@ public:
 	Block(std::vector<Stmt*> statements) {
 		this->statements = statements;
 	}
-	void accept(StmtVisitor& v) override {
-		v.visit(*this);
+	std::any accept(StmtVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -109,8 +125,8 @@ public:
 		this->thenBranch = thenBranch;
 		this->elseBranch = elseBranch;
 	}
-	void accept(StmtVisitor& v) override {
-		v.visit(*this);
+	std::any accept(StmtVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
@@ -123,8 +139,8 @@ public:
 		this->name = name;
 		this->right = right;
 	}
-	void accept(StmtVisitor& v) override {
-		v.visit(*this);
+	std::any accept(StmtVisitor& v) override {
+		return v.visit(*this);
 	}
 ;};
 
