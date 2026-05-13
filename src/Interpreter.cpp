@@ -217,6 +217,9 @@ bool Interpreter::isEqual(const std::any &left, const std::any &right)
     if (left.type() == typeid(std::string) && right.type() == typeid(std::string)) {
         return std::any_cast<std::string>(left) == std::any_cast<std::string>(right); 
     }
+
+    // Implicit return of false
+    return false;
 }
 
 void Interpreter::checkNumberOperand(Token &tok, const std::any &value)
