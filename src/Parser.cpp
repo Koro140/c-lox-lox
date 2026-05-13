@@ -12,7 +12,12 @@ std::vector<Stmt*> Parser::parse() {
 }
 
 Stmt* Parser::declaration() {
-    try {   
+    try {
+        if (match({TOK_FUN}))
+        {
+            return function("function");
+        }
+           
         if (match({TOK_VAR})) {
             return varDeclaration();
         }
@@ -60,6 +65,31 @@ Stmt *Parser::varDeclaration()
     }
     consume(TOK_SEMICOLON, "Expect ';' after variable declaration");
     return new Var{name, initializer};
+}
+
+Stmt *Parser::function(const std::string& kind)
+{
+    Token* name = consume(TOK_IDENTIFIER, "Expect " + kind + " name.");
+    consume(TOK_LEFT_PAREN, "Expect '(' after " + kind + " name.");
+
+    std::vector<Token*> parameters;
+    if (!check(TOK_RIGHT_PAREN)) {
+        do
+        {
+            if (parameters.size() >= 255) {
+                error(peek(), "Can't have more than 255 parameters.");
+            }
+            
+            parameters.push_back(consume(TOK_IDENTIFIER, "Expect parameter name"));
+        } while (match({TOK_COMMA}));
+        
+    }
+    consume(TOK_RIGHT_PAREN, "Expect ')' after parameters.");
+    
+    consume(TOK_LEFT_BRACE, "Expect '{' before " + kind + " body.");
+    std::vector<Stmt*> body = block();
+
+    return new Function{name, parameters, body};
 }
 
 Stmt *Parser::ifStatement() {
@@ -253,7 +283,42 @@ Expr* Parser::unary() {
         return new Unary{op, right};
     }
     
-    return primary();
+    return call();
+}
+
+Expr *Parser::call()
+{
+    Expr* expr = primary();
+
+    while (true) {
+        if (match({TOK_LEFT_PAREN})) {
+            expr = finishCall(expr);
+        } else {
+            break;
+        }
+    }
+
+    return expr;
+}
+
+Expr *Parser::finishCall(Expr* callee)
+{
+    std::vector<Expr*> arguments;
+    if (!check(TOK_RIGHT_PAREN)) {
+        do
+        {
+            if (arguments.size() >= 255) {
+                error(peek(), "Can't have more than 255 arguments.");
+            }
+            
+            arguments.push_back(expression());
+        } while (match({TOK_COMMA}));
+        
+    }
+    
+    Token* paren = consume(TOK_RIGHT_PAREN,  "Expect ')' after arguments.");
+
+    return new Call{callee, paren, arguments};
 }
 
 Expr* Parser::primary() {

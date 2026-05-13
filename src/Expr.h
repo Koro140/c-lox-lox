@@ -10,6 +10,7 @@
 class Grouping;
 class Assign;
 class Binary;
+class Call;
 class Logical;
 class Unary;
 class Literal;
@@ -20,6 +21,7 @@ public:
 	virtual void visit(Grouping& v) = 0;
 	virtual void visit(Assign& v) = 0;
 	virtual void visit(Binary& v) = 0;
+	virtual void visit(Call& v) = 0;
 	virtual void visit(Logical& v) = 0;
 	virtual void visit(Unary& v) = 0;
 	virtual void visit(Literal& v) = 0;
@@ -68,6 +70,22 @@ public:
 		this->left = left;
 		this->op = op;
 		this->right = right;
+	}
+	void accept(ExprVisitor& v) override {
+		v.visit(*this);
+	}
+;};
+
+class Call : public Expr {
+public:
+	Expr* calle;
+	Token* paren;
+	std::vector<Expr*> arguments;
+public:
+	Call(Expr* calle, Token* paren, std::vector<Expr*> arguments) {
+		this->calle = calle;
+		this->paren = paren;
+		this->arguments = arguments;
 	}
 	void accept(ExprVisitor& v) override {
 		v.visit(*this);

@@ -27,6 +27,7 @@ private:
     Stmt* statement();
 
     Stmt* varDeclaration();
+    Stmt* function(const std::string& kind);
     Stmt* ifStatement();
     Stmt* forStatement();
     Stmt* printStatement();
@@ -44,7 +45,8 @@ private:
     Expr* factor();
 
     Expr* unary();
-
+    Expr* call();
+    Expr* finishCall(Expr* callee);
     Expr* primary();
 
     ParseError error(Token* token, const std::string& message);

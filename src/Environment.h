@@ -16,7 +16,7 @@ public:
     Environment() {}
     Environment(std::shared_ptr<Environment> enclosing) : enclosing(enclosing) {}
     ~Environment() {
-        std::cout << "Env destroyed\n";
+        // std::cout << "Env destroyed\n";
     }
 
     void define(std::string name, std::any value);

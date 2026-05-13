@@ -9,6 +9,7 @@
 
 class Expression;
 class Print;
+class Function;
 class While;
 class Block;
 class If;
@@ -18,6 +19,7 @@ class StmtVisitor {
 public:
 	virtual void visit(Expression& v) = 0;
 	virtual void visit(Print& v) = 0;
+	virtual void visit(Function& v) = 0;
 	virtual void visit(While& v) = 0;
 	virtual void visit(Block& v) = 0;
 	virtual void visit(If& v) = 0;
@@ -48,6 +50,22 @@ public:
 public:
 	Print(Expr* expr) {
 		this->expr = expr;
+	}
+	void accept(StmtVisitor& v) override {
+		v.visit(*this);
+	}
+;};
+
+class Function : public Stmt {
+public:
+	Token* name;
+	std::vector<Token*> params;
+	std::vector<Stmt*> body;
+public:
+	Function(Token* name, std::vector<Token*> params, std::vector<Stmt*> body) {
+		this->name = name;
+		this->params = params;
+		this->body = body;
 	}
 	void accept(StmtVisitor& v) override {
 		v.visit(*this);

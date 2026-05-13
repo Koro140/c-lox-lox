@@ -1,6 +1,7 @@
 #include "Interpreter.h"
 
 #include "Application.h"
+#include "LoxFunction.h"
 
 void Interpreter::interpret(std::vector<Stmt*> statements)
 {
@@ -98,6 +99,31 @@ void Interpreter::visit(Binary& v) {
     }
 }
 
+void Interpreter::visit(Call &v)
+{
+    std::any callee = evaluate(v.calle);
+    std::vector<std::any> arguments;
+    for (Expr* argument : v.arguments)
+    {
+        arguments.push_back(evaluate(argument));
+    }
+    
+    if (callee.type() != typeid(std::shared_ptr<LoxCallable>)) {
+        throw RuntimeError{v.paren,"Can only call functions and classes."};
+    }
+    
+    auto function = std::any_cast<std::shared_ptr<LoxCallable>>(callee);
+
+    if (arguments.size() != function->arity()) {
+      throw RuntimeError(v.paren, "Expected " +
+            std::to_string(function->arity()) + " arguments but got " +
+            std::to_string(arguments.size()) + ".");
+    }
+    
+    result = function->call(this, arguments);
+    return;
+}
+
 void Interpreter::visit(Logical &v)
 {
     std::any left = evaluate(v.left);
@@ -191,6 +217,12 @@ void Interpreter::visit(Block &v)
 void Interpreter::visit(Expression &v)
 {
     evaluate(v.expr);
+}
+
+void Interpreter::visit(Function &v)
+{
+    std::shared_ptr<LoxCallable> function = std::make_shared<LoxFunction>(&v);
+    environment->define(v.name->getLexeme(), function);
 }
 
 bool Interpreter::isTruthy(const std::any& value)
